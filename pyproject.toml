@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eeg"
+version = "0.1.0"
+description = "EEG bachelor project"
+authors = [
+    {name = "XXX", email = "XXX@dtu.dk"},
+]
+readme = "readme.md"
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+
+[tool.setuptools]
+packages = ["eegatscale", "preprocessing"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+select = [
+    "E",
+    "I", #see: https://pypi.org/project/isort/
+]

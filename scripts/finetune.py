@@ -1,0 +1,146 @@
+from jsonargparse import CLI
+import h5py
+import torch
+from torch.utils.data import DataLoader, Dataset
+import os
+from torch.utils.data import DataLoader
+from sklearn.model_selection import StratifiedGroupKFold, StratifiedKFold
+from pytorch_lightning import Trainer, seed_everything
+from pytorch_lightning.callbacks import ModelCheckpoint, RichProgressBar, EarlyStopping
+from lightning.pytorch.loggers import WandbLogger
+from eegatscale.models import LinearHeadBENDR, FullBENDR
+from eegatscale.transforms import StandardizeLabel
+from typing import Optional
+
+class H5PYDatasetLabeled(Dataset):
+    def __init__(self, path: str, transform=None):
+        if os.path.isdir(path):
+            self.paths = [os.path.join(path, f) for f in os.listdir(path) if f.endswith('.hdf5')]
+        else:
+            raise ValueError("Path should be a directory")
+        
+        self.paths.sort()
+        self.data_key = 'data'
+        self.label_key = 'labels'
+        self.lengths = [self._get_file_length(path) for path in self.paths]
+        
+        self.sessions = torch.concat([self._get_session(path) for path in self.paths])
+        self.labels = torch.cat([self._get_labels(path) for path in self.paths])
+        
+        self.cumulative_lengths = self._compute_cumulative_lengths(self.lengths)
+        
+        if transform is not None:
+            self.transform = transform
+
+    def _get_file_length(self, path):
+        with h5py.File(path, 'r') as file:
+            return file[self.data_key].shape[0]
+        
+    def _get_session(self, path):
+        with h5py.File(path, 'r') as file:
+            return torch.from_numpy(file['sessions_labels'][:])
+        
+    def _get_labels(self, path):
+        with h5py.File(path, 'r') as file:
+            return torch.from_numpy(file[self.label_key][:])
+
+    def _compute_cumulative_lengths(self, lengths):
+        cumulative_lengths = [0]
+        for length in lengths:
+            cumulative_lengths.append(cumulative_lengths[-1] + length)
+        return cumulative_lengths
+
+    def __len__(self):
+        return self.cumulative_lengths[-1]
+
+    def _load_data(self, path, local_index):
+        with h5py.File(path, 'r') as file:
+            data = file[self.data_key][local_index]
+            label = file[self.label_key][local_index]
+            return torch.from_numpy(data), label
+
+    def __getitem__(self, global_index: int):
+        # If global_index is out of bounds, raise an error
+        if global_index < 0 or global_index >= len(self):
+            raise IndexError(f"Index {global_index} out of bounds for dataset of length {len(self)}")
+        
+        file_index = self._find_file_index(global_index)
+        local_index = global_index - self.cumulative_lengths[file_index]
+        data, label = self._load_data(self.paths[file_index], local_index)
+        
+        if hasattr(self, 'transform'):
+            data, label = self.transform((data, label))
+        
+        return data, label
+
+    def _find_file_index(self, global_index):
+        # Binary search to find the right file index
+        low, high = 0, len(self.cumulative_lengths) - 1
+        while low < high:
+            mid = (low + high) // 2
+            if global_index < self.cumulative_lengths[mid + 1]:
+                high = mid
+            else:
+                low = mid + 1
+        return low
+    
+    def teardown(self):
+        pass
+    
+def finetune(dataset_path: str, encoder_path: Optional[str], name: str, batch_size: int = 16,
+                num_workers: int = 4, num_epochs: int = 100, seed: int = 42, n_device: int = 1,
+                device: str = 'cuda', out_features: int = 2, freeze_encoder: bool = False):
+        
+    # Set all seeds
+    seed_everything(seed, workers=True)
+
+    # Transformer and Dataset
+    transformer = StandardizeLabel()
+    dataset = H5PYDatasetLabeled(dataset_path, transform=transformer)
+    
+    groups = dataset.sessions
+    
+    # Val sessions
+    test_groups = torch.tensor([120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135])
+    test_index = torch.where(torch.isin(groups, test_groups))[0]
+    train_index = torch.where(~torch.isin(groups, test_groups))[0]    
+
+    # Print sizes
+    print("Train Size:", len(train_index))
+    print("Test Size:", len(test_index))
+    
+    
+    # Main cross-validation loop
+    training_set = torch.utils.data.Subset(dataset, train_index)
+    test_set = torch.utils.data.Subset(dataset, test_index)
+    
+    training_loader = DataLoader(training_set, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=num_workers)
+    
+    model = LinearHeadBENDR(encoder_path, encoder_h=512, in_features=19, out_features=out_features)
+    #model = FullBENDR(encoder_path, encoder_h=512, in_features=19, out_features=out_features)
+    
+    if freeze_encoder:
+        for param in model.encoder.parameters():
+            param.requires_grad = False
+            
+    model_checkpoint = ModelCheckpoint(monitor='val_loss', save_weights_only=True)
+    # Set wandb loger
+    logger = WandbLogger(name=name, project='eegatscale')
+    early_stopping = EarlyStopping(monitor='val_loss', patience=100)
+    
+    trainer = Trainer(accelerator='auto', devices=n_device, max_epochs=num_epochs,
+                        callbacks=[model_checkpoint, early_stopping], logger=logger,
+                        check_val_every_n_epoch=1, log_every_n_steps=1)
+    trainer.fit(model, train_dataloaders=training_loader, val_dataloaders=test_loader)
+    trainer.test(model, dataloaders=test_loader, ckpt_path='best')
+    
+    # Get checkpoint path
+    checkpoint_path = model_checkpoint.best_model_path
+    print("Checkpoint path:", checkpoint_path)
+            
+
+if __name__ == "__main__":
+    import warnings
+    warnings.filterwarnings("ignore")
+    CLI(finetune)
