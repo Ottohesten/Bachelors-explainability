@@ -13,7 +13,7 @@ echo "Node: $(hostname)"
 echo "Start: $(date +%F-%R:%S)"
 echo -e "Working dir: $(pwd)\n"
 
-module load python3/3.10.13
+module load python3/3.11.9
 
 source env/bin/activate
 python scripts/pretrain.py --config configs/pretrain/pretrain_bendr_raw_all.yaml fit
