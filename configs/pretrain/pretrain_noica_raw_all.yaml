@@ -1,0 +1,66 @@
+fit:
+  data:
+    trainset_path: /dtu-compute/EEG_at_scale/preprocess/preprocess_tuh_noica_combined
+    valset_path: /scratch/s194260/preprocess_pretrain/preprocess_all_noica
+    batch_size: 64
+    num_workers: 8
+    batch_transforms:
+      - class_path: eegatscale.transforms.RandomTemporalCrop
+        init_args:
+          max_crop_frac: 0.05
+          temporal_dim: 2
+  model:
+    class_path: eegatscale.models.Bendr
+    init_args:
+      encoder:
+        class_path: eegatscale.models.bendr.BendrEncoder
+        init_args:
+          in_features: 19 #20
+          encoder_h: 512
+          grad_frac: 0.1
+      contextualizer:
+        class_path: eegatscale.models.bendr.BendrContextualizer
+        init_args:
+          in_features: 512
+          layer_drop: 0.01
+      mask_rate: 0.065
+      mask_span: 10
+      num_negatives: 20
+      temp: 0.1
+      activation_weight: 1.0
+      #checkpoint: /scratch/s194260/BENDR/bendr_data/checkpoints_new/last_ica.ckpt
+  optimizer:
+    class_path: torch.optim.Adam
+    init_args:
+      lr: 0.00002
+      weight_decay: 0.01
+      betas: [0.9, 0.98]
+  trainer:
+    default_root_dir: /scratch/s194260/BENDR/
+    max_epochs: 10
+    num_sanity_val_steps: 0
+    #sync_batchnorm: True
+    callbacks:
+      - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+        init_args:
+          #every_n_train_steps: 5000
+          save_top_k: 1
+          monitor: val_loss
+          dirpath: /scratch/s194260/checkpoints/
+          filename: tuh-noica-raw-{epoch}-{step}-{val_loss:.2f}
+          save_last: True
+      - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+    logger:
+      - class_path: pytorch_lightning.loggers.WandbLogger
+        init_args:
+          name: noica_raw_all_final
+          save_dir: /scratch/s194260/BENDR/logs
+          project: eegatscale
+          log_model: False
+    precision: bf16
+    val_check_interval: 50
+    log_every_n_steps: 10
+
+    # for multi-gpu training uncomment these lines
+    devices: 3  # set to number of gpus available
+    strategy: ddp_find_unused_parameters_true

@@ -13,9 +13,9 @@ echo "Node: $(hostname)"
 echo "Start: $(date +%F-%R:%S)"
 echo -e "Working dir: $(pwd)\n"
 
-source ~/.bashrc
-module load CUDA/12.1 CUDNN/8.9
-conda activate eegatscale
-python scripts/pretrain.py -c configs/pretrain.yaml fit
+module load python3/3.10.13
+
+source env/bin/activate
+python scripts/pretrain.py --config configs/pretrain/pretrain_bendr_raw_all.yaml fit
 
 echo "Done: $(date +%F-%R:%S)"

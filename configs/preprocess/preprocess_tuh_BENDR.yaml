@@ -1,0 +1,9 @@
+pipeline:
+  class_path: preprocessing.pipeline.DynamicPipelineBENDR
+dataset_path: data/tuh_eeg_events_TUEV/edf
+out_path: out/
+log_path: logs/preprocess_tuh_BENDR.log 
+overwrite: False
+shuffle_files: True
+batch_size: 5
+n_jobs: 20
