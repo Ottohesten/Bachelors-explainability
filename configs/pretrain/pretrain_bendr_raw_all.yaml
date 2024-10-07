@@ -62,7 +62,7 @@ fit:
     log_every_n_steps: 10
 
     # for multi-gpu training uncomment these lines
-    devices: 3  # set to number of gpus available
-    strategy: ddp_find_unused_parameters_true
+    #devices: 3  # set to number of gpus available
+    #strategy: ddp_find_unused_parameters_true
   
   #ckpt_path: /scratch/s194260/checkpoints/tuh-bendr-raw-epoch=4-step=34692-val_loss=0.43.ckpt
