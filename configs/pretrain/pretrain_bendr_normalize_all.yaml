@@ -1,7 +1,7 @@
 fit:
   data:
     trainset_path: /dtu-compute/EEG_at_scale/preprocess/preprocess_tuh_bendr_combined
-    valset_path: /scratch/s194260/preprocess_pretrain/preprocess_all_bendr
+    valset_path: /dtu-compute/EEG_at_scale/preprocess/preprocess_downstream_mmidb_bendr_5.0_combined
     batch_size: 64
     num_workers: 8
     batch_transforms:
@@ -37,7 +37,7 @@ fit:
       weight_decay: 0.01
       betas: [0.9, 0.98]
   trainer:
-    default_root_dir: /scratch/s194260/BENDR/
+    default_root_dir: /work3/s194101/BENDR/
     max_epochs: 10
     num_sanity_val_steps: 0
     #sync_batchnorm: True
@@ -47,7 +47,7 @@ fit:
           #every_n_train_steps: 5000
           save_top_k: 1
           monitor: val_loss
-          dirpath: /scratch/s194260/checkpoints/
+          dirpath: /work3/s194101/checkpoints/
           filename: tuh-bendr-normalize-{epoch}-{step}-{val_loss:.2f}
           save_last: True
       - class_path: pytorch_lightning.callbacks.LearningRateMonitor
@@ -55,7 +55,7 @@ fit:
       - class_path: pytorch_lightning.loggers.WandbLogger
         init_args:
           name: bendr_normalize_all_final
-          save_dir: /scratch/s194260/BENDR/logs
+          save_dir: /work3/s194101/BENDR/logs
           project: eegatscale
           log_model: False
     precision: bf16

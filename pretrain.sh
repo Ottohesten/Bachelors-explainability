@@ -3,9 +3,9 @@
 #BSUB -o pretrain_2_%J.out
 #BSUB -e pretrain_2_%J.err
 #BSUB -q gpua100
-#BSUB -n 4
-#BSUB -R "rusage[mem=4G]"
-#BSUB -R "span[hosts=1]"
+#BSUB -n 8
+#BSUB -R "rusage[mem=8G]"
+#BSUB -gpu "num=3:mode=exclusive_process"
 #BSUB -W 08:00
 #BSUB -u otto@skytop.dk
 #BSUB -B
@@ -20,6 +20,6 @@ echo -e "Working dir: $(pwd)\n"
 module load python3/3.11.9
 
 source env/bin/activate
-python scripts/pretrain.py --config configs/pretrain/pretrain_bendr_raw_all.yaml fit
+python scripts/pretrain.py --config configs/pretrain/pretrain_bendr_normalize_all.yaml fit
 
 echo "Done: $(date +%F-%R:%S)"
