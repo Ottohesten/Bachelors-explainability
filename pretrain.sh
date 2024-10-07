@@ -1,12 +1,16 @@
 #!/bin/bash
-
-#SBATCH --job-name=bendr
-#SBATCH --output=bendr-%J.out
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=40gb
-#SBATCH --gres=gpu:Ampere:3
-#SBATCH --export=ALL
-##SBATCH --nodelist=comp-gpu04
+#BSUB -J pretrain_2
+#BSUB -o pretrain_2_%J.out
+#BSUB -e pretrain_2_%J.err
+#BSUB -q gpua100
+#BSUB -n 4
+#BSUB -R "rusage[mem=4G]"
+#BSUB -R "span[hosts=1]"
+#BSUB -W 08:00
+#BSUB -u otto@skytop.dk
+#BSUB -B
+#BSUB -N
+# end of BSUB options
 
 ## INFO
 echo "Node: $(hostname)"
