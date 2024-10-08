@@ -1,0 +1,16 @@
+pipeline:
+  class_path: preprocessing.pipeline_downstream.DownstreamPipeline
+  init_args:
+    lp_freq: 75
+    do_ica: False
+    line_freqs: [60]
+    descriptions: ['T1', 'T2']
+    tmin: -0.5
+    tlen: 6.0
+dataset_path: eegmmidb_files.txt
+out_path: /scratch/s194260/preprocess_downstream/preprocess_downstream_mmidb_noica_6.0/
+log_path: preprocess_downstream_mmidb_noica_6.0.log 
+overwrite: False
+shuffle_files: True
+batch_size: 4
+n_jobs: 16

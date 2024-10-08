@@ -1,0 +1,16 @@
+pipeline:
+  class_path: preprocessing.pipeline_downstream.DownstreamPipeline
+  init_args:
+    do_ica: False
+    line_freqs: [60]
+    descriptions: ['1', '2', '3', '4']
+    tmin: -0.5
+    tlen: 6.0
+    channels_rename: {EEG-0: FC3, EEG-1: FC1, EEG-2: FCz, EEG-3: FC2, EEG-4: FC4, EEG-5: C5, EEG-6: C1, EEG-7: C2, EEG-8: C6, EEG-9: CP3, EEG-10: CP1, EEG-11: CPz, EEG-12: CP2, EEG-13: CP4, EEG-14: P1, EEG-15: P2, EEG-16: POz}
+dataset_path: /scratch/s194260/BCIC_edf_new/
+out_path: /scratch/s194260/preprocess_downstream/preprocess_downstream_BCIC_noica_6.0_rename/
+log_path: preprocess_downstream_BCIC_noica_rename_6.0.log 
+overwrite: False
+shuffle_files: True
+batch_size: 4
+n_jobs: 16

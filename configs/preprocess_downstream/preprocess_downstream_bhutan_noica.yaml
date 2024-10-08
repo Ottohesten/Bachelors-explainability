@@ -1,0 +1,16 @@
+pipeline:
+  class_path: preprocessing.pipeline_downstream.DownstreamPipeline
+  init_args:
+    do_ica: False
+    line_freqs: [50]
+    lp_freq: null
+    descriptions: ['Eye blinking', 'Eye movement left-right', 'Eyes closed', 'Eyes opened', 'Jaw clenching']
+    tmin: -0.5
+    tlen: 6.0
+dataset_path: /scratch/s194260/bhutan/
+out_path: /scratch/s194260/preprocess_downstream/preprocess_downstream_bhutan_noica_6.0/
+log_path: preprocess_downstream_bhutan_noica_6.0.log 
+overwrite: False
+shuffle_files: True
+batch_size: 4
+n_jobs: 16

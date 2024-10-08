@@ -1,0 +1,12 @@
+dataset_path: /scratch/s194260/preprocess_downstream/preprocess_downstream_mmidb_noica_combined
+encoder_path: /scratch/s194260/BENDR/bendr_data/checkpoints/tuh_ica_standardize.ckpt
+name: mmidb_noica_ica_5.0
+n_splits: 10
+batch_size: 16
+num_workers: 4
+num_epochs: 50
+seed: 42
+n_repeats: 5
+device: cuda
+n_device: 1
+out_features: 2

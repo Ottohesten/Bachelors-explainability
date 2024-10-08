@@ -1,0 +1,12 @@
+dataset_path: /scratch/s194260/preprocess_downstream/preprocess_downstream_bhutan_noica_6.0_combined
+encoder_path: /scratch/s194260/BENDR/bendr_data/checkpoints/tuh_ica_standardize.ckpt
+name: bhutan_noica_ica_6.0
+n_splits: 10
+batch_size: 16
+num_workers: 4
+num_epochs: 50
+seed: 42
+n_repeats: 5
+device: cuda
+n_device: 1
+out_features: 5
