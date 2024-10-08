@@ -161,9 +161,10 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-data
+
 MNIST
-*.edf
 *.hdf5
 lightning_logs/
 logs/
+data/tuh_eeg_artifact_TUAR
+data/tuh_eeg_events_TUEV
