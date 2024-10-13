@@ -17,6 +17,6 @@ echo -e "Working dir: $(pwd)
 source ~/.bashrc
 module load CUDA/12.1 CUDNN/8.9
 conda activate EEGatScale
-python scripts/preprocess_downstream.py --config /home/agjma/EEGatScale/configs/preprocess_downstream/preprocess_downstream_mmidb_noica.yaml
+python scripts/preprocess_downstream.py --config configs/preprocess_downstream/preprocess_downstream_mmidb_noica.yaml
 
 echo "Done: $(date +%F-%R:%S)"

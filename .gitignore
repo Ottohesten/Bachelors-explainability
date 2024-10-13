@@ -168,3 +168,4 @@ lightning_logs/
 logs/
 data/tuh_eeg_artifact_TUAR
 data/tuh_eeg_events_TUEV
+data/

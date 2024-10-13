@@ -69,6 +69,7 @@ class DownstreamPipeline(BasePipeline):
         times = []
         indices = []
         descriptions = []
+        sessions = []
         
         for i, raw in enumerate(raws):
             windows, time_slices, descri = split_raw_annotations(raw, labels = self.descriptions, tmin=self.tmin,
@@ -77,12 +78,26 @@ class DownstreamPipeline(BasePipeline):
             times.extend(time_slices)
             descriptions.extend(descri)
             indices.extend([i] * len(windows))
+            sessions.extend(int(raw.filenames[0].split("\\")[-2][1:]) for _ in range(len(windows)))
             
         labels = [self.description_map[description] for description in descriptions]
+
+        # session is just the subject number what is the parent directory name number
+        # sessions = [int(src_path.parent.stem[1:]) for src_path in src_paths for _ in range(len(self.descriptions))]
+
+        # This is goint to be coming out as a list of s and then some digits, e.g S001, S002, S003
+        # we remove the S
+
+        # print("raws: ", raws)
+        # print("raw_windows: ", raw_windows)
+        # print("descriptions: ", descriptions)
+        # print("src_paths: ", src_paths)
+        # print("indices: ", indices)
+        # print("labels: ", labels)
+        # print("sessions: ", sessions)
+        assert len(raw_windows) == len(times) == len(indices) == len(labels) == len(sessions)
         
-        assert len(raw_windows) == len(times) == len(indices) == len(labels)
-        
-        return raw_windows, times, indices, labels
+        return raw_windows, times, indices, labels, sessions
     
     def run_single(self, raw, filename) -> Optional[mne.io.Raw]:
         window_info_str = f"File: {filename}."

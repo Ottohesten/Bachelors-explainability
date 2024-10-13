@@ -32,7 +32,7 @@ def preprocess(pipeline: Pipeline, src_paths: list[Path], dest_path: str, conf_l
     
     logging.debug("Starting preprocessing...")    
     
-    raws, times, indices, labels = pipeline(src_paths)
+    raws, times, indices, labels, sessions = pipeline(src_paths)
     
     descriptions = pipeline.descriptions
     
@@ -51,11 +51,12 @@ def preprocess(pipeline: Pipeline, src_paths: list[Path], dest_path: str, conf_l
         
         file.create_dataset("data", data=np.array([raw._data for raw in raws]), dtype='float32', fletcher32=True)
         file.create_dataset("labels", data=np.array(labels, dtype=np.int32), dtype='int32', fletcher32=True)
+        file.create_dataset("sessions_labels", data=np.array(sessions, dtype=np.int32), dtype='int32', fletcher32=True)
             
     logging.debug(f"Saved to {dest_path}. File size: {Path(dest_path).stat().st_size / 1e6:.2f} MB.")            
     
     # Delete the raws to save memory and clean up memory
-    del raws, times, indices, labels
+    del raws, times, indices, labels, sessions
     
     # Sleep for 5 seconds to avoid memory issues
     sleep(5)
@@ -123,9 +124,9 @@ def preprocess_dataset(pipeline: Pipeline, dataset_path: str, out_path: str, log
     _ = Parallel(n_jobs=n_jobs)(delayed(preprocess)(pipeline, src_path_batch, des_path, conf_log) \
         for src_path_batch, des_path in tqdm(zip(src_paths_batches, des_paths),total=len(src_paths_batches), desc='Preprocessing files'))
     
-    
+    quit()
     from os.path import join
-    from scripts.hdf5_combiner import HDF5CombinerDownstream
+    from hdf5_combiner import HDF5CombinerDownstream
     
     max_file_size = 4000
     src_dir = out_path

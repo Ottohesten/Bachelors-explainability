@@ -246,13 +246,16 @@ class HDF5CombinerDownstream:
         # Save time slices as a dataset
         self.new_file.create_dataset("time_slices", data=self.time_slices, dtype=np.float32, fletcher32=True)
         # self.new_file.attrs['time_slices'] = self.time_slices   
+
+        # save session_labels as a dataset
+        self.new_file.create_dataset("sessions_labels", data=self.sessions_labels, dtype=np.int32, fletcher32=True)
     
         self.new_file.attrs['files'] = self.files
         self.new_file.attrs['descriptions'] = self.descriptions
         
         assert len(self.time_slices) == len(self.file_idxs) == self.data_idx 
 
-    def add_data(self, data, file_idxs, files, time_slices, labels):
+    def add_data(self, data, file_idxs, files, time_slices, labels, sessions_labels):
         data_size = data.nbytes / 1e6  # Convert bytes to MB
         if self.current_file_size + data_size > self.max_file_size:
             self.save_and_reset()
@@ -285,7 +288,10 @@ class HDF5CombinerDownstream:
             self.time_slices = np.concatenate([self.time_slices, time_slices], axis=0)
             
         if len(labels) > 0:
-            self.labels = np.concatenate([self.labels, labels], axis=0) 
+            self.labels = np.concatenate([self.labels, labels], axis=0)
+        
+        if len(sessions_labels) > 0:
+            self.sessions_labels = np.concatenate([self.sessions_labels, sessions_labels], axis=0)
         
         self.current_file_size += data_size
 
@@ -301,7 +307,8 @@ class HDF5CombinerDownstream:
                 time_slices = file.attrs['time_slices']
                 
                 labels = file['labels'][:]
-                self.add_data(data, file_idxs, files, time_slices, labels)
+                sessions_labels = file['sessions_labels'][:]
+                self.add_data(data, file_idxs, files, time_slices, labels, sessions_labels)
 
         # Close the last file properly
         if self.new_file is not None:
