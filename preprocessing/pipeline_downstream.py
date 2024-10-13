@@ -69,7 +69,7 @@ class DownstreamPipeline(BasePipeline):
         times = []
         indices = []
         descriptions = []
-        sessions = []
+        sessions_labels = []
         
         for i, raw in enumerate(raws):
             windows, time_slices, descri = split_raw_annotations(raw, labels = self.descriptions, tmin=self.tmin,
@@ -78,7 +78,7 @@ class DownstreamPipeline(BasePipeline):
             times.extend(time_slices)
             descriptions.extend(descri)
             indices.extend([i] * len(windows))
-            sessions.extend(int(raw.filenames[0].split("\\")[-2][1:]) for _ in range(len(windows)))
+            sessions_labels.extend(int(raw.filenames[0].split("\\")[-2][1:]) for _ in range(len(windows)))
             
         labels = [self.description_map[description] for description in descriptions]
 
@@ -95,9 +95,9 @@ class DownstreamPipeline(BasePipeline):
         # print("indices: ", indices)
         # print("labels: ", labels)
         # print("sessions: ", sessions)
-        assert len(raw_windows) == len(times) == len(indices) == len(labels) == len(sessions)
+        assert len(raw_windows) == len(times) == len(indices) == len(labels) == len(sessions_labels)
         
-        return raw_windows, times, indices, labels, sessions
+        return raw_windows, times, indices, labels, sessions_labels
     
     def run_single(self, raw, filename) -> Optional[mne.io.Raw]:
         window_info_str = f"File: {filename}."

@@ -124,7 +124,7 @@ def preprocess_dataset(pipeline: Pipeline, dataset_path: str, out_path: str, log
     _ = Parallel(n_jobs=n_jobs)(delayed(preprocess)(pipeline, src_path_batch, des_path, conf_log) \
         for src_path_batch, des_path in tqdm(zip(src_paths_batches, des_paths),total=len(src_paths_batches), desc='Preprocessing files'))
     
-    quit()
+    
     from os.path import join
     from hdf5_combiner import HDF5CombinerDownstream
     

@@ -227,6 +227,7 @@ class HDF5CombinerDownstream:
         self.files = np.empty((0), dtype=h5py.string_dtype())
         self.time_slices = np.empty((0, 2), dtype=np.float32)
         self.labels = np.empty((0), dtype=np.int32)
+        self.sessions_labels = np.empty((0), dtype=np.int32)
         
         self.current_file_size = 0
         self.data_idx = 0
