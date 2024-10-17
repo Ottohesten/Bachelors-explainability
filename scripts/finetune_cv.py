@@ -121,7 +121,7 @@ def finetune_cv(dataset_path: str, encoder_path: Optional[str], name: str, n_spl
                     param.requires_grad = False
                     
             model_checkpoint = ModelCheckpoint(monitor='val_loss', save_weights_only=True)
-            logger = CSVLogger("/scratch/s194260/finetune_logs_all", name=name, prefix="Fold_{}_Repeat_{}".format(i, repeat))
+            logger = CSVLogger("/scratch/s194101/finetune_logs_all", name=name, prefix="Fold_{}_Repeat_{}".format(i, repeat))
             early_stopping = EarlyStopping(monitor='val_loss', patience=10)
             #progress_bar = RichProgressBar()
             

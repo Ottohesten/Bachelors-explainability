@@ -79,7 +79,7 @@ class DownstreamPipeline(BasePipeline):
             descriptions.extend(descri)
             indices.extend([i] * len(windows))
             logging.debug(f"raw filename: {raw.filenames[0]}")
-            sessions_labels.extend(int(raw.filenames[0].split("\\")[-2][1:]) for _ in range(len(windows)))
+            sessions_labels.extend(int(raw.filenames[0].split("/")[-2][1:]) for _ in range(len(windows)))
             
         labels = [self.description_map[description] for description in descriptions]
 
