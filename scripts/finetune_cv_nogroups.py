@@ -24,7 +24,7 @@ class H5PYDatasetLabeled(Dataset):
         self.label_key = 'labels'
         self.lengths = [self._get_file_length(path) for path in self.paths]
         
-        self.sessions = torch.concat([self._get_session(path) for path in self.paths])
+        # self.sessions = torch.concat([self._get_session(path) for path in self.paths])
         self.labels = torch.cat([self._get_labels(path) for path in self.paths])
         
         self.cumulative_lengths = self._compute_cumulative_lengths(self.lengths)
@@ -36,9 +36,9 @@ class H5PYDatasetLabeled(Dataset):
         with h5py.File(path, 'r') as file:
             return file[self.data_key].shape[0]
         
-    def _get_session(self, path):
-        with h5py.File(path, 'r') as file:
-            return torch.from_numpy(file['sessions_labels'][:])
+    # def _get_session(self, path):
+    #     with h5py.File(path, 'r') as file:
+    #         return torch.from_numpy(file['sessions_labels'][:])
         
     def _get_labels(self, path):
         with h5py.File(path, 'r') as file:
@@ -91,8 +91,7 @@ def finetune_cv(dataset_path: str, encoder_path: Optional[str], name: str, n_spl
                 num_workers: int = 4, num_epochs: int = 50, seed: int = 42, n_repeats: int = 5, n_device: int = 1,
                 device: str = 'cuda', out_features: int = 2, freeze_encoder: bool = False):
     
-    group_kfold = StratifiedGroupKFold(n_splits=n_splits)
-    #group_kfold = StratifiedKFold(n_splits=n_splits)
+    group_kfold = StratifiedKFold(n_splits=n_splits)
     
     # Set all seeds
     seed_everything(seed, workers=True)
@@ -102,11 +101,12 @@ def finetune_cv(dataset_path: str, encoder_path: Optional[str], name: str, n_spl
     dataset = H5PYDatasetLabeled(dataset_path, transform=transformer)
     
     y = dataset.labels
-    groups = dataset.sessions            
+    # groups = dataset.sessions            
     
     # Main cross-validation loop
     for repeat in range(n_repeats):  # Repeating 10-fold cross-validation 5 times
-        for i, (train_index, test_index) in enumerate(group_kfold.split(torch.arange(len(dataset)), y, groups)):
+        print(f"Fold {repeat}")
+        for i, (train_index, test_index) in enumerate(group_kfold.split(torch.arange(len(dataset)), y)):
             training_set = torch.utils.data.Subset(dataset, train_index)
             test_set = torch.utils.data.Subset(dataset, test_index)
             
@@ -139,4 +139,17 @@ def finetune_cv(dataset_path: str, encoder_path: Optional[str], name: str, n_spl
 if __name__ == "__main__":
     import warnings
     warnings.filterwarnings("ignore")
-    CLI(finetune_cv)
+    # CLI(finetune_cv)
+    dataset_path = "/scratch/agjma/preprocess_downstream_mmidb_noica_5.0_combined"
+    encoder_path = "/scratch/agjma/checkpoints/tuh-noica-standardize-epoch=9-step=68317-val_loss=0.26.ckpt"
+    name = "mmidb_noica_noica_5.0_nogroups_2"
+    n_splits = 10
+    batch_size = 16
+    num_workers = 4
+    num_epochs = 50
+    seed = 42
+    n_repeats = 2
+    device = "cuda"
+    n_device = 1
+    out_feature = 2
+    finetune_cv(dataset_path, encoder_path, name, n_splits, batch_size, num_workers, num_epochs, seed, n_repeats, n_device, device, out_feature)
