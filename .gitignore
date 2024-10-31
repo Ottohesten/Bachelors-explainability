@@ -169,3 +169,8 @@ logs/
 data/tuh_eeg_artifact_TUAR
 data/tuh_eeg_events_TUEV
 data/
+
+random_tuh
+sanity_check_concepts_MMIDB
+cav
+experiment_logs
