@@ -1,0 +1,12 @@
+dataset_path: /scratch/s194101/data/preprocessed_downstream/tusz/noica_60.0_titans_combine_test_debug_combined
+encoder_path: /scratch/agjma/checkpoints/tuh-noica-standardize-epoch=9-step=68317-val_loss=0.26.ckpt
+name: tusz_noica_noica_60.0_nogroups_2
+n_splits: 4
+batch_size: 80
+num_workers: 4
+num_epochs: 30
+seed: 42
+n_repeats: 2
+device: cuda
+n_device: 1
+out_features: 2

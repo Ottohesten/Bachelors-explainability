@@ -1,0 +1,17 @@
+pipeline:
+  class_path: preprocessing.pipeline_downstream.DownstreamPipeline
+  init_args:
+    lp_freq: 75
+    do_ica: False
+    line_freqs: [60]
+    descriptions: ['T1', 'T2']
+    tmin: -0.5
+    tlen: 5.0
+dataset_path: /scratch/agjma/eegmmidb/files/
+out_path: /scratch/s194101/data/preprocessed_downstream/mmidb_noica_5.0_titans_no_combine/
+log_path: preprocess_downstream_mmidb_noica_5.0_titans_no_combine.log 
+overwrite: False
+shuffle_files: True
+batch_size: 4
+n_jobs: 16
+combine: False
