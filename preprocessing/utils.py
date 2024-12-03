@@ -180,6 +180,10 @@ def split_raw_annotations(raw, labels, tmin = -0.5, tlen = 5.0, verbose=True):
         info = mne.create_info(ch_names=raw.info['ch_names'], sfreq=sfreq, ch_types=raw.get_channel_types())
         window_raw = mne.io.RawArray(window, info, verbose=False)
         window_raw.set_montage(raw.get_montage())
+
+        # add the annotations to the raw window
+        # the onset is 0.5 seconds into the window, it lasts a total of 5 seconds
+        # window_raw.set_annotations(mne.Annotations(onset=[0.5], duration=[duration], description=[description]))
         
         windows.append(window_raw)
         time_slices.append((times[0], times[-1]))

@@ -225,6 +225,7 @@ class HDF5CombinerDownstream:
         
         self.file_idxs = np.empty((0), dtype=np.int32)
         self.files = np.empty((0), dtype=h5py.string_dtype())
+        # self.file_paths = np.empty((0), dtype=h5py.string_dtype())
         self.time_slices = np.empty((0, 2), dtype=np.float32)
         self.labels = np.empty((0), dtype=np.int32)
         self.sessions_labels = np.empty((0), dtype=np.int32)
@@ -250,13 +251,18 @@ class HDF5CombinerDownstream:
 
         # save session_labels as a dataset
         self.new_file.create_dataset("sessions_labels", data=self.sessions_labels, dtype=np.int32, fletcher32=True)
-    
+
+
+        # save file_paths as a dataset
+        # self.new_file.create_dataset("file_paths", data=self.file_paths, dtype=h5py.string_dtype(), fletcher32=True)
+
         self.new_file.attrs['files'] = self.files
         self.new_file.attrs['descriptions'] = self.descriptions
         
         assert len(self.time_slices) == len(self.file_idxs) == self.data_idx 
 
     def add_data(self, data, file_idxs, files, time_slices, labels, sessions_labels):
+    # def add_data(self, data, file_idxs, files, time_slices, labels, sessions_labels, file_paths):
         data_size = data.nbytes / 1e6  # Convert bytes to MB
         if self.current_file_size + data_size > self.max_file_size:
             self.save_and_reset()
@@ -294,6 +300,9 @@ class HDF5CombinerDownstream:
         if len(sessions_labels) > 0:
             self.sessions_labels = np.concatenate([self.sessions_labels, sessions_labels], axis=0)
         
+        # if len(file_paths) > 0:
+            # self.file_paths = np.concatenate([self.file_paths, file_paths], axis=0)
+
         self.current_file_size += data_size
 
     def combine(self):
@@ -306,9 +315,12 @@ class HDF5CombinerDownstream:
                 file_idxs = file.attrs['file_idxs']
                 files = file.attrs['files']
                 time_slices = file.attrs['time_slices']
+                # file_paths = file.attrs['file_paths']
+
                 
                 labels = file['labels'][:]
                 sessions_labels = file['sessions_labels'][:]
+                # self.add_data(data, file_idxs, files, time_slices, labels, sessions_labels, file_paths)
                 self.add_data(data, file_idxs, files, time_slices, labels, sessions_labels)
 
         # Close the last file properly
@@ -336,8 +348,10 @@ if __name__ == "__main__":
     # max_file_size = args.max_file_size
     
     max_file_size = 4000
-    src_dir = "/scratch/s194260/preprocess_pretrain/preprocess_bhutan_ica"
-    out_dir = src_dir + "_combined"
+    # src_dir = "/scratch/s194260/preprocess_pretrain/preprocess_bhutan_ica"
+    src_dir = "/scratch/s194101/data/preprocessed_downstream/tusz_noica_5.0_titans_combine_test_debug"
+    # src_dir = "/scratch/s194101/data/preprocessed_downstream/tuev_noica_5.0_titans_combine_test_debug_2"
+    out_dir = src_dir + "_combined_2"
     data_files_paths = glob(join(src_dir, '**/*.hdf5'), recursive=True)
     data_files_paths.sort()
 
@@ -349,8 +363,8 @@ if __name__ == "__main__":
     combiner.combine()
     
     # Delete the original dir
-    import shutil
-    shutil.rmtree(src_dir)
+    # import shutil
+    # shutil.rmtree(src_dir)
     
     # Rename the new dir
     import os

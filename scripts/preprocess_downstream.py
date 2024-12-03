@@ -10,6 +10,7 @@ import logging
 import os, glob
 from joblib import Parallel, delayed
 from preprocessing.pipeline import Pipeline
+from preprocessing.pipeline_downstream import DownstreamPipeline
 import warnings
 from time import sleep
 from pathlib import Path
@@ -32,7 +33,7 @@ def preprocess(pipeline: Pipeline, src_paths: list[Path], dest_path: str, conf_l
     
     logging.debug("Starting preprocessing...")    
     
-    raws, times, indices, labels, sessions = pipeline(src_paths)
+    raws, times, indices, labels, sessions, file_paths = pipeline(src_paths)
     
     descriptions = pipeline.descriptions
     
@@ -48,11 +49,15 @@ def preprocess(pipeline: Pipeline, src_paths: list[Path], dest_path: str, conf_l
         file.attrs['time_slices'] = times
         file.attrs['file_idxs'] = indices
         file.attrs['descriptions'] = descriptions
+        file.attrs['file_paths'] = file_paths
+
+        # # save the data raws
+        # file.attrs["raws"] = raws
         
         file.create_dataset("data", data=np.array([raw._data for raw in raws]), dtype='float32', fletcher32=True)
         file.create_dataset("labels", data=np.array(labels, dtype=np.int32), dtype='int32', fletcher32=True)
         file.create_dataset("sessions_labels", data=np.array(sessions, dtype=np.int32), dtype='int32', fletcher32=True)
-            
+        # export the data raws to a file
     logging.debug(f"Saved to {dest_path}. File size: {Path(dest_path).stat().st_size / 1e6:.2f} MB.")            
     
     # Delete the raws to save memory and clean up memory
@@ -62,7 +67,7 @@ def preprocess(pipeline: Pipeline, src_paths: list[Path], dest_path: str, conf_l
     sleep(5)
 
 def preprocess_dataset(pipeline: Pipeline, dataset_path: str, out_path: str, log_path: str,
-                        overwrite: bool = False, shuffle_files: bool = True, batch_size: int = 10, n_jobs: int = 6):
+                        overwrite: bool = False, shuffle_files: bool = True, batch_size: int = 10, n_jobs: int = 6, combine: bool = True):
     
     if os.path.exists(log_path):
         if overwrite:
@@ -124,31 +129,61 @@ def preprocess_dataset(pipeline: Pipeline, dataset_path: str, out_path: str, log
     _ = Parallel(n_jobs=n_jobs)(delayed(preprocess)(pipeline, src_path_batch, des_path, conf_log) \
         for src_path_batch, des_path in tqdm(zip(src_paths_batches, des_paths),total=len(src_paths_batches), desc='Preprocessing files'))
     
-    
-    from os.path import join
-    from hdf5_combiner import HDF5CombinerDownstream
-    
-    max_file_size = 4000
-    src_dir = out_path
-    out_dir = join(Path(src_dir).parent, f"{Path(src_dir).name}_combined")
-    
-    data_files_paths = glob.glob(join(src_dir, '*.hdf5'))
-    data_files_paths.sort()
-    
-    print(src_dir)
-    print(out_dir)
-    
-    # Create directory if it does not exist
-    Path(out_dir).mkdir(parents=True, exist_ok=True)
-    
-    combiner = HDF5CombinerDownstream(data_files_paths, out_dir, max_file_size=max_file_size)
-    combiner.combine()
-    
-    # Delete src_dir
-    from shutil import rmtree
-    rmtree(src_dir)
+    if combine:
+        from os.path import join
+        from hdf5_combiner import HDF5CombinerDownstream
+        max_file_size = 4000
+        src_dir = out_path
+        out_dir = join(Path(src_dir).parent, f"{Path(src_dir).name}_combined")
+        
+        data_files_paths = glob.glob(join(src_dir, '*.hdf5'))
+        data_files_paths.sort()
+        
+        print(src_dir)
+        print(out_dir)
+        print("combining")
+        # Create directory if it does not exist
+        Path(out_dir).mkdir(parents=True, exist_ok=True)
+        
+        combiner = HDF5CombinerDownstream(data_files_paths, out_dir, max_file_size=max_file_size)
+        combiner.combine()
+        
+        # Delete src_dir
+        from shutil import rmtree
+        rmtree(src_dir)
     
 
 if __name__ == "__main__":
     mne.set_log_level("CRITICAL")
-    CLI(preprocess_dataset)
+    # CLI(preprocess_dataset)
+    pipeline = DownstreamPipeline(
+    lp_freq=75,
+    hp_freq=1.0,
+    do_ica=False,
+    line_freqs=[60],
+    # descriptions=['T1', 'T2'], # MMIDB
+    # descriptions=['spsw', 'gped', 'pled', "eyem", "artf", "bckg"], # TUEV
+    descriptions=['seiz', "bckg"], # TUSZ
+    # tmin=-0.5,
+    tmin=0,
+    tlen=60.0
+    # tlen=5.0
+)
+    # Define paths and other parameters
+    # dataset_path = "/scratch/agjma/eegmmidb/files/"
+    # dataset_path = "/scratch/s194101/TUEV_processed/"
+    dataset_path = "/scratch/s194101/TUSZ_processed/"
+    # out_path = "/scratch/s194101/data/preprocessed_downstream/mmidb_noica_5.0_titans_combine_test_debug/"
+    # out_path = "/scratch/s194101/data/preprocessed_downstream/tuev/noica_60.0_titans_combine_test_debug/"
+    # out_path = "/scratch/s194101/data/preprocessed_downstream/tuev/noica_5.0_titans_combine_test_debug/"
+    out_path = "/scratch/s194101/data/preprocessed_downstream/tusz/noica_60.0_titans_combine_test_debug/"
+    # log_path = "logs/preprocess_downstream_tuev_noica_60.0_titans_combine_test_debug.log"
+    # log_path = "logs/preprocess_downstream_tuev_noica_5.0_titans_combine_test_debug.log"
+    log_path = "logs/preprocess_downstream_tusz_noica_60.0_titans_combine_test_debug.log"
+    overwrite = False
+    shuffle_files = True
+    batch_size = 4 # base
+    n_jobs = 16
+    combine = True
+
+    preprocess_dataset(pipeline, dataset_path, out_path, log_path, overwrite, shuffle_files, batch_size, n_jobs, combine)

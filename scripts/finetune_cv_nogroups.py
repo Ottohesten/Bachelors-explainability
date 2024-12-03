@@ -139,17 +139,17 @@ def finetune_cv(dataset_path: str, encoder_path: Optional[str], name: str, n_spl
 if __name__ == "__main__":
     import warnings
     warnings.filterwarnings("ignore")
-    # CLI(finetune_cv)
-    dataset_path = "/scratch/agjma/preprocess_downstream_mmidb_noica_5.0_combined"
-    encoder_path = "/scratch/agjma/checkpoints/tuh-noica-standardize-epoch=9-step=68317-val_loss=0.26.ckpt"
-    name = "mmidb_noica_noica_5.0_nogroups_2"
-    n_splits = 10
-    batch_size = 16
-    num_workers = 4
-    num_epochs = 50
-    seed = 42
-    n_repeats = 2
-    device = "cuda"
-    n_device = 1
-    out_feature = 2
-    finetune_cv(dataset_path, encoder_path, name, n_splits, batch_size, num_workers, num_epochs, seed, n_repeats, n_device, device, out_feature)
+    CLI(finetune_cv)
+    # dataset_path = "/scratch/agjma/preprocess_downstream_mmidb_noica_5.0_combined"
+    # encoder_path = "/scratch/agjma/checkpoints/tuh-noica-standardize-epoch=9-step=68317-val_loss=0.26.ckpt"
+    # name = "mmidb_noica_noica_5.0_nogroups_2"
+    # n_splits = 10
+    # batch_size = 16
+    # num_workers = 4
+    # num_epochs = 50
+    # seed = 42
+    # n_repeats = 2
+    # device = "cuda"
+    # n_device = 1
+    # out_feature = 2
+    # finetune_cv(dataset_path, encoder_path, name, n_splits, batch_size, num_workers, num_epochs, seed, n_repeats, n_device, device, out_feature)

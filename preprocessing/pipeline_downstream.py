@@ -70,6 +70,10 @@ class DownstreamPipeline(BasePipeline):
         indices = []
         descriptions = []
         sessions_labels = []
+        file_paths = []
+        export = False
+        # test_data_dir = "/home/s194101/Bachelors-explainability/raws_test"
+        test_data_dir = "/scratch/s194101/data/preprocessed_downstream/mmidb_noica_5.0_titans_windows_no_anno"
         
         for i, raw in enumerate(raws):
             windows, time_slices, descri = split_raw_annotations(raw, labels = self.descriptions, tmin=self.tmin,
@@ -79,26 +83,28 @@ class DownstreamPipeline(BasePipeline):
             descriptions.extend(descri)
             indices.extend([i] * len(windows))
             logging.debug(f"raw filename: {raw.filenames[0]}")
-            sessions_labels.extend(int(raw.filenames[0].split("/")[-2][1:]) for _ in range(len(windows)))
+            # sessions_labels.extend(int(raw.filenames[0].split("/")[-2][1:]) for _ in range(len(windows))) # the session label is just the subject which is the parent directory name number
+            sessions_labels.extend(int(0) for _ in range(len(windows))) # the session label is just the subject which is the parent directory name number
+            file_path = raw.filenames[0]
+            # filename = raw.filenames[0].split("/")[-1].split(".")[0]
+            # run = raw.filenames[0].split("/")[-1].split(".")[0].split("R")[-1]
+            file_paths.extend([file_path] * len(windows))
+            if export:
+                for i, (window, description) in enumerate(zip(windows, descri)):
+                    # window.save(f"{test_data_dir}/{file_path.split('/')[-1].split('.')[0]}_{i}.edf", overwrite=True) # using save
+                    # window.export(f"{test_data_dir}/{file_path.split('/')[-1].split('.')[0]}_{i}_no_anno.edf") # using export
+                    window.export(f"{test_data_dir}/{description}/{file_path.split('/')[-1].split('.')[0]}_{i}.edf") # using export
+                    
+
             
         labels = [self.description_map[description] for description in descriptions]
 
         # session is just the subject number what is the parent directory name number
-        # sessions = [int(src_path.parent.stem[1:]) for src_path in src_paths for _ in range(len(self.descriptions))]
 
-        # This is goint to be coming out as a list of s and then some digits, e.g S001, S002, S003
-        # we remove the S
-
-        # print("raws: ", raws)
-        # print("raw_windows: ", raw_windows)
-        # print("descriptions: ", descriptions)
-        # print("src_paths: ", src_paths)
-        # print("indices: ", indices)
-        # print("labels: ", labels)
-        # print("sessions: ", sessions)
-        assert len(raw_windows) == len(times) == len(indices) == len(labels) == len(sessions_labels)
+        assert len(raw_windows) == len(times) == len(indices) == len(labels) == len(sessions_labels) == len(file_paths), "Lengths of raw_windows, times, indices, labels, sessions_labels and file_paths should be equal."
         
-        return raw_windows, times, indices, labels, sessions_labels
+        return raw_windows, times, indices, labels, sessions_labels, file_paths
+        # return raw_windows, times, indices, labels
     
     def run_single(self, raw, filename) -> Optional[mne.io.Raw]:
         window_info_str = f"File: {filename}."
