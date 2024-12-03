@@ -105,7 +105,10 @@ class LinearHeadBENDR(LightningModule):
         z = self(x)
         loss = self.loss_fn(z, y.long())    
         acc = (z.argmax(dim=1) == y).float().mean()
-        return loss, {'acc': acc}
+        std = (z.argmax(dim=1) == y).float().std()
+        # standard error of the mean
+        sem = std / torch.sqrt(torch.tensor(len(y), dtype=torch.float32))
+        return loss, {'acc': acc, 'sem': sem}
 
     def training_step(self, batch, batch_idx):
         self.train()
