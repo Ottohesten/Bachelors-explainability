@@ -1,1 +1,0 @@
-rsync -auxvL --delete nedc-tuh-eeg@www.isip.piconepress.com:data/tuh_eeg/euh_eeg_artifact/v3.0.1/ .
