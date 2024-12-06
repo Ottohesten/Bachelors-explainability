@@ -110,7 +110,7 @@ def save_concept(DATA_PATH_CONCEPTS, raw, concept, patient, run, idx, code, NUMB
         pickle.dump(x, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def define_concepts(DATA_PATH_RAW, DATA_PATH_CONCEPTS, activity_dict, patients, runs_to_use, bands_to_use, codes_to_use, label_names, WINDOW_LENGTH=4, NUMBER_CHANNELS=20, NUMBER_SAMPLES=1024, resting_state=True):
+def define_concepts(DATA_PATH_RAW, DATA_PATH_CONCEPTS, activity_dict, patients, runs_to_use, bands_to_use, codes_to_use, label_names, WINDOW_LENGTH=4, NUMBER_CHANNELS=20, NUMBER_SAMPLES=1024, resting_state=True, sigma=True):
     number_labels = len(label_names)
     number_bands = len(bands_to_use)
 
@@ -151,6 +151,10 @@ def define_concepts(DATA_PATH_RAW, DATA_PATH_CONCEPTS, activity_dict, patients, 
                     activity = np.abs(activity - baseline_activity_mean)
                     #activity = np.abs(activity - baseline_activity_mean) / baseline_activity_std
 
+                    if sigma:
+                        activity = activity / baseline_activity_std
+
+
                     most_active_band_idx = np.argmax(activity.mean(axis=1))
                     most_active_band = bands_to_use[most_active_band_idx]
 
@@ -173,7 +177,7 @@ if __name__ == '__main__':
     DATA_PATH_RAW = "/scratch/agjma/eegmmidb/files/"
     # DATA_PATH_CONCEPTS = '/home/williamtheodor/Documents/DL for EEG Classification/data/sanity check concepts MMIDB/'
     # DATA_PATH_CONCEPTS = 'sanity_check_concepts_MMIDB_2/'
-    DATA_PATH_CONCEPTS = '/scratch/s194101/concepts/sanity_check_concepts_MMIDB_alpha_no_baseline/'
+    DATA_PATH_CONCEPTS = '/scratch/s194101/concepts/sanity_check_concepts_MMIDB_alpha_baseline_with_sigma/'
     # ACTIVTY_DICT_PATH = '/home/williamtheodor/Documents/DL for EEG Classification/data/'
     ACTIVTY_DICT_PATH = '/home/s194101/TCAV-BENDR-own/'
 
@@ -184,7 +188,7 @@ if __name__ == '__main__':
     patients = [key for key in activity_dict['Alpha'].keys() if key not in patients_to_exclude]
 
     bands = list(activity_dict.keys())
-    # bands_to_use = bands
+    bands_to_use = bands
     # bands_to_use = ['Alpha', 'Gamma'] #argparse
     bands_to_use = ['Alpha'] #argparse
 
@@ -192,11 +196,15 @@ if __name__ == '__main__':
     task_runs = ['R03', 'R04', 'R07', 'R08', 'R11', 'R12']
 
     runs_to_use = task_runs #argparse
-    resting_state = False # true if using baseline runs
+    resting_state = True # true if using baseline runs
 
     codes = ['T0', 'T1', 'T2']
     # codes_to_use = ['T0'] #argparse
     codes_to_use = ['T0', 'T1', 'T2']
+
+    sigma = True # divide by std
+
+
 
     subjects_dir, subject, trans, src_path, bem_path = get_fsaverage()
     labels = get_labels(subjects_dir, parcellation_name=PARCELLATION)
@@ -207,4 +215,4 @@ if __name__ == '__main__':
     define_concepts(DATA_PATH_RAW, DATA_PATH_CONCEPTS, activity_dict, 
                     patients, runs_to_use, bands_to_use, codes_to_use, label_names, 
                     WINDOW_LENGTH=4, NUMBER_CHANNELS=19, NUMBER_SAMPLES=1024, 
-                    resting_state=resting_state)
+                    resting_state=resting_state, sigma=sigma)
