@@ -172,14 +172,15 @@ if __name__ == "__main__":
     # Define paths and other parameters
     # dataset_path = "/scratch/agjma/eegmmidb/files/"
     # dataset_path = "/scratch/s194101/TUEV_processed/"
-    dataset_path = "/scratch/s194101/TUSZ_processed/"
+    dataset_path = "/scratch/s194101/TUSZ_processed_whole_dataset_split/eval/"
+    # dataset_path = "/scratch/s194101/TUSZ_processed_eval/"
     # out_path = "/scratch/s194101/data/preprocessed_downstream/mmidb_noica_5.0_titans_combine_test_debug/"
     # out_path = "/scratch/s194101/data/preprocessed_downstream/tuev/noica_60.0_titans_combine_test_debug/"
     # out_path = "/scratch/s194101/data/preprocessed_downstream/tuev/noica_5.0_titans_combine_test_debug/"
-    out_path = "/scratch/s194101/data/preprocessed_downstream/tusz/noica_60.0_titans_combine_test_debug/"
+    out_path = "/scratch/s194101/data/preprocessed_downstream/tusz/noica_60.0_titans_combine_whole_dataset_split_eval/"
     # log_path = "logs/preprocess_downstream_tuev_noica_60.0_titans_combine_test_debug.log"
     # log_path = "logs/preprocess_downstream_tuev_noica_5.0_titans_combine_test_debug.log"
-    log_path = "logs/preprocess_downstream_tusz_noica_60.0_titans_combine_test_debug.log"
+    log_path = "logs/preprocess_downstream_tusz_noica_60.0_titans_combine_whole_dataset_split_eval.log"
     overwrite = False
     shuffle_files = True
     batch_size = 4 # base

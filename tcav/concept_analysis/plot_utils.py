@@ -35,6 +35,7 @@ def plot_tcav_scores(all_experimental_sets, all_tcav_scores, concept_names=None,
             _, pval_whit = mannwhitneyu(pos_scores, neg_scores)
 
             print(f"pval: {pval}, pval_whit: {pval_whit}")
+            pval = pval_whit
             # Bonferroni correction
             m = 2
             alpha = alpha / m
