@@ -177,7 +177,7 @@ if __name__ == '__main__':
     DATA_PATH_RAW = "/scratch/agjma/eegmmidb/files/"
     # DATA_PATH_CONCEPTS = '/home/williamtheodor/Documents/DL for EEG Classification/data/sanity check concepts MMIDB/'
     # DATA_PATH_CONCEPTS = 'sanity_check_concepts_MMIDB_2/'
-    DATA_PATH_CONCEPTS = '/scratch/s194101/concepts/sanity_check_concepts_MMIDB_alpha_baseline_with_sigma/'
+    DATA_PATH_CONCEPTS = '/scratch/s194101/concepts/sanity_check_concepts_MMIDB_alpha_no_baseline_T0/'
     # ACTIVTY_DICT_PATH = '/home/williamtheodor/Documents/DL for EEG Classification/data/'
     ACTIVTY_DICT_PATH = '/home/s194101/TCAV-BENDR-own/'
 
@@ -200,9 +200,10 @@ if __name__ == '__main__':
 
     codes = ['T0', 'T1', 'T2']
     # codes_to_use = ['T0'] #argparse
-    codes_to_use = ['T0', 'T1', 'T2']
+    # codes_to_use = ['T0', 'T1', 'T2']
+    codes_to_use = ['T0']
 
-    sigma = True # divide by std
+    sigma = False # divide by std
 
 
 

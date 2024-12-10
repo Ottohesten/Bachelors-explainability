@@ -86,10 +86,11 @@ def plot_tcav_scores(all_experimental_sets, all_tcav_scores, concept_names=None,
 
     ax.set_ylabel("TCAV score", fontsize=18)
     ax.legend(title="Network layer")
-    ax.legend(loc="upper right", title="Network layer")
+    # ax.legend(loc="upper right", title="Network layer")
     ax.set_title(title, fontsize=32)
     # make x_ticks bigger
-    ax.tick_params(axis='x', labelsize=18)
+    # ax.tick_params(axis='x', labelsize=18)
+    ax.tick_params(axis='x', labelsize=14)
 
     plt.tight_layout()
     plt.savefig(f"figures/{plt_name}.{file_type}")
